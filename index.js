@@ -8,19 +8,6 @@ const path = require("path");
 const conf = require("./config");
 const utils = require("./utlis");
 
-// c2s
-const TOKEN = 0;
-const PING = 1;
-const SUB = 2;
-const UNSUB = 3;
-
-// s2c
-const AUTH = 0;
-const EVENT = 2;
-const TOAST = 3;
-const CHAT = 4;
-const NOTICE = 5;
-
 function sendEvent(socket, uuid){
     var parts = uuid.split('-');
     var hh = parts[0] + parts[1] + parts[2]
@@ -32,14 +19,13 @@ function sendEvent(socket, uuid){
     let bbuffer = new DataView(buffer);
 
     let offset = 0
-    bbuffer.setUint8(offset, EVENT);
+    bbuffer.setUint8(offset, utils.ENUM.S2C.EVENT);
     offset += 1;
     bbuffer.setBigUint64(offset, uuidHigh);
     offset += 8;
     bbuffer.setBigUint64(offset, uuidLow);
 
     socket.send(buffer);
-    console.log(uuid)
 }
 
 //cors origin bypass
@@ -183,12 +169,16 @@ fastify.post("/api/equip", async (req, res) => {
 })
 
 //delete avatar
-fastify.delete("/api/", async (req, res) => {
+fastify.delete("/api/avatar", async (req, res) => {
     const token = req.headers["token"];
     const playerData = players[token];
     if (playerData) {
-        fs.unlinkSync(path.join(__dirname, "avatar/" + playerData.uuid + ".moon"))
+        fs.unlinkSync(path.join(__dirname, "avatars/" + playerData.uuid + ".moon"))
 
+        let bc = sessions.find(e => e.owner == players[token].uuid)
+        bc.member.forEach(e => {
+            sendEvent(e.ws, players[token].uuid)
+        })
         //boardcast logic
         return "ok"
     } else {
@@ -311,12 +301,12 @@ fastify.register(async function (fastify) {
             if (Buffer.isBuffer(message)) {
                 const bytes = new Uint8Array(message)
                 const buffer = new DataView(bytes.buffer);
-                let offset = 0;ปปปปปปปปปปปปปปป
+                let offset = 0;
                 const messageType = buffer.getUint8(offset);
                 offset += 1;
 
                 switch (messageType) {
-                    case TOKEN:
+                    case utils.ENUM.C2S.TOKEN:
                         var token = new TextDecoder().decode(buffer.buffer.slice(offset));
                         let playerData = players[token]
 
@@ -326,10 +316,10 @@ fastify.register(async function (fastify) {
                             socket.send(Buffer.from([0]))
                         }
                         break;
-                    case PING:
+                    case utils.ENUM.C2S.PING:
                         console.log(bytes)
                         break;
-                    case SUB:
+                    case utils.ENUM.C2S.SUB:
                         var uuidHigh = buffer.getBigUint64(offset);
                         offset += 8;
                         var uuidLow = buffer.getBigUint64(offset);
@@ -358,7 +348,7 @@ fastify.register(async function (fastify) {
                             }
                         })
                         break;
-                    case UNSUB:
+                    case utils.ENUM.C2S.UNSUB:
                         var uuidHigh = buffer.getBigUint64(offset);
                         offset += 8;
                         var uuidLow = buffer.getBigUint64(offset);
@@ -372,10 +362,6 @@ fastify.register(async function (fastify) {
                         console.log(messageType)
                 }
             }
-        });
-
-        socket.on('pong', () => {
-
         });
 
         socket.on('close', () => {
@@ -397,12 +383,3 @@ fastify.listen({
 }).then(() => {
     console.log("----------------------------------------------\n\nEmulator Figura V2\nstart @ " + "http://localhost:" + conf.port + "\n\n----------------------------------------------\n\n[Console]")
 })
-
-function createBuffer(type, uuid) {
-    let buffer = new ByteBuffer(1 + 16);
-    buffer.writeByte(type);
-    let uuidBuffer = ByteBuffer.wrap(uuid, 'hex');
-    buffer.append(uuidBuffer);
-
-    return buffer;
-}
