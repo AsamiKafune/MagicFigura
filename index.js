@@ -2,7 +2,7 @@ const fastify = require("fastify")({ logger: false })
 const { setIntervalAsync, clearIntervalAsync } = require('set-interval-async');
 const { Buffer } = require('buffer');
 const conf = require("./config");
-const utils = require("./utlis");
+const utils = require("./utils");
 const cache = require("./cache")
 
 //cors origin bypass
