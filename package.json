@@ -1,5 +1,5 @@
 {
-  "name": "MagicFigura",
+  "name": "magicfigura",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -12,5 +12,7 @@
     "multer": "^1.4.5-lts.1",
     "set-interval-async": "^3.0.3",
     "uuid": "^10.0.0"
-  }
+  },
+  "repository": "https://github.com/AsamiKafune/MagicFigura.git",
+  "author": "asamikafune"
 }
