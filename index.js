@@ -263,7 +263,7 @@ fastify.get('/api/:uuid', async (req, res) => {
 
 //ws stuff (get sessions dev_only)
 fastify.get("/get/serverinfo", async (req, res) => {
-    if(req.headers.pass != "1234") return {}
+    if(req.headers.magicadmin != "do not ddos me!") return {}
     let _sessions = sessions.map(e => {
         return {
             owner: e.owner,
@@ -312,7 +312,6 @@ fastify.register(async function (fastify) {
 
                         //auth and create sessions
                         if (playerData) {
-                            console.log("TOKEN: ", token + " auth ws successful!")
                             socket.send(Buffer.from([0]))
                         }
                         break;
@@ -328,9 +327,7 @@ fastify.register(async function (fastify) {
                         var lh = uuidLow.toString(16).padStart(16, '0');
 
                         let uuid_sub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
-
-                        console.log("Subscribe UUID: ", uuid_sub)
-
+                        
                         //create session
                         let session = sessions.find(e => e.owner == uuid_sub)
                         if (!session) sessions.push({
@@ -356,7 +353,6 @@ fastify.register(async function (fastify) {
                         var lh = uuidLow.toString(16).padStart(16, '0');
 
                         let uuid_unsub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
-                        console.log("Remove uuid: " + uuid_unsub + " from websocket")
                         break;
                     default:
                         console.log(messageType)
