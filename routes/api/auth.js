@@ -37,6 +37,10 @@ module.exports = (fastify, opts, done) => {
                     username: r.name
                 };
 
+                setTimeout(() => {
+                    delete cache.serverIds[serverId] // clear cache serverId
+                }, 20000);
+            
                 return res.send(token);
             } catch (error) {
                 console.error(error);
