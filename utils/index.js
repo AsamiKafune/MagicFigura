@@ -46,6 +46,7 @@ const ENUM = {
     },
     S2C: {
         AUTH: 0,
+        PING: 1,
         EVENT: 2,
         TOAST: 3,
         CHAT: 4,

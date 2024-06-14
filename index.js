@@ -79,11 +79,31 @@ fastify.register(async function (fastify) {
                             //auth and create sessions
                             if (playerData) {
                                 console.log(playerData.username, "-> connect to MagicFigura successful.")
+                                cache.wsData.set(socket, playerData.uuid)
                                 socket.send(Buffer.from([0]))
                             }
                             break;
                         case utils.ENUM.C2S.PING:
-                            console.log(bytes)
+
+                            var _wsIdentify = cache.wsData.get(socket);
+                            var parts = _wsIdentify.split('-');
+                            var hh = parts[0] + parts[1] + parts[2]
+                            var lh = parts[3] + parts[4]
+                            var uuidHigh = BigInt('0x' + hh);
+                            var uuidLow = BigInt('0x' + lh);
+
+                            buffer.setUint8(offset, utils.ENUM.S2C.PING)
+                            offset += 1
+                            buffer.setBigInt64(offset, uuidHigh, true)
+                            offset += 8
+                            buffer.setBigInt64(offset, uuidLow, true)
+                            offset += 8
+                            buffer.setInt32(offset,)
+
+                            let bc = cache.sessions.find(e => e.owner == _wsIdentify)
+                            bc.member.forEach(e => {
+                                e.ws.send(buffer)
+                            })
                             break;
                         case utils.ENUM.C2S.SUB:
                             var uuidHigh = buffer.getBigUint64(offset);
