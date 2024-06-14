@@ -1,5 +1,5 @@
 const cache = require("../../cache")
-const utils = require("../../utlis")
+const utils = require("../../utils")
 const axios = require("axios")
 
 module.exports = (fastify, opts, done) => {

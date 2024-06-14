@@ -143,5 +143,5 @@ fastify.listen({
     port: conf.port,
     host: conf.host
 }).then(() => {
-    console.log("----------------------------------------------\n\nEmulator Figura V2\nstart @ " + "http://localhost:" + conf.port + "\n\n----------------------------------------------\n\n[Console]")
+    console.log("----------------------------------------------\n\nEmulator Figura V2\nBy Kafune CH (MagicLab)\nServer start @ " + "http://localhost:" + conf.port + "\n\n----------------------------------------------\n\n[Console]")
 })
