@@ -126,6 +126,7 @@ fastify.register(async function (fastify) {
                     }
                 }
             } catch (error) {
+                console.error(error)
                 socket.close()
             }
         });

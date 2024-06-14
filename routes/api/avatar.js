@@ -9,24 +9,21 @@ module.exports = (fastify, opts, done) => {
     //upload avatar
     fastify.put("/avatar", { preHandler: [playerCache] }, async (req, res) => {
         const userInfo = req.user["data"];
-        if (userInfo) {
-            console.info(`${userInfo.username} (${userInfo.uuid}) tried to upload`);
-            const avatarFile = path.join(__dirname, '../../avatars', `${userInfo.uuid}.moon`);
-            try {
-                await fs.promises.writeFile(avatarFile, req.body);
-                return res.send('success');
-            } catch (error) {
-                console.error(error);
-                return res.code(500).send('Failed to upload avatar');
-            }
-        } else {
-            return res.code(401).send('Unauthorized');
+        console.info(`${userInfo.username} (${userInfo.uuid}) tried to upload.`);
+        const avatarFile = path.join(__dirname, '../../avatars', `${userInfo.uuid}.moon`);
+        try {
+            await fs.promises.writeFile(avatarFile, req.body);
+            return res.send('success');
+        } catch (error) {
+            console.error(error);
+            return res.code(500).send('Failed to upload avatar.');
         }
     })
 
     //verify equip
     fastify.post("/equip", { preHandler: [playerCache] }, async (req, res) => {
         const playerData = req.user["data"];
+        console.info(`${playerData.username} (${playerData.uuid}) upload successful.`);
         let bc = cache.sessions.find(e => e.owner == playerData.uuid)
         bc.member.forEach(e => {
             sendEvent(e.ws, playerData.uuid)
