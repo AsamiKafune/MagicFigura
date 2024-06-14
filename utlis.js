@@ -23,8 +23,25 @@ function parseUUID(string) {
     return uuid;
 }
 
+const ENUM = {
+    C2S: {
+        TOKEN: 0,
+        PING: 1,
+        SUB: 2,
+        UNSUB: 3,
+    },
+    S2C: {
+        AUTH: 0,
+        EVENT: 2,
+        TOAST: 3,
+        CHAT: 4,
+        NOTICE: 5,
+    }
+}
+
 module.exports = {
     generateHexString,
     calculateFileSHA256,
-    parseUUID
+    parseUUID,
+    ENUM
 }
