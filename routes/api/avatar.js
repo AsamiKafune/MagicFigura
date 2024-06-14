@@ -137,6 +137,7 @@ module.exports = (fastify, opts, done) => {
     done()
 }
 
+//utils
 function sendEvent(socket, uuid){
     var parts = uuid.split('-');
     var hh = parts[0] + parts[1] + parts[2]

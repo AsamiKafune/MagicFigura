@@ -5,8 +5,6 @@ const conf = require("./config");
 const utils = require("./utlis");
 const cache = require("./cache")
 
-
-
 //cors origin bypass
 fastify.options('*', function (request, reply) {
     reply.send()
@@ -38,29 +36,11 @@ fastify.addContentTypeParser('application/octet-stream', { parseAs: 'buffer' }, 
     done(null, body);
 });
 
-
-
 require("./routes")(fastify)
 
 //get welcome message
 fastify.get("/", async () => {
     return conf.welcomeMessage
-})
-
-//ws stuff (get sessions dev_only)
-fastify.get("/serverinfo", async (req, res) => {
-    if(req.headers.magicadmin != "do not ddos me!") return {}
-    let _sessions = cache.sessions.map(e => {
-        return {
-            owner: e.owner,
-            member: e.member.map(_ => _.uuid)
-        };
-    });
-    return {
-        sessions : _sessions,
-        server: cache.serverIds,
-        players: cache.players
-    }
 })
 
 //ws stuff
