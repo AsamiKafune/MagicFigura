@@ -23,6 +23,20 @@ function parseUUID(string) {
     return uuid;
 }
 
+function convertObjectToArray(obj) {
+    const resultArray = [];
+
+    for (const [hash, userDetails] of Object.entries(obj)) {
+        resultArray.push({
+            hash: hash,
+            uuid: userDetails.uuid,
+            username: userDetails.username
+        });
+    }
+
+    return resultArray;
+}
+
 const ENUM = {
     C2S: {
         TOKEN: 0,
@@ -40,6 +54,7 @@ const ENUM = {
 }
 
 module.exports = {
+    convertObjectToArray,
     generateHexString,
     calculateFileSHA256,
     parseUUID,
