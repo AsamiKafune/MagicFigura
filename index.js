@@ -46,7 +46,6 @@ fastify.get("/", async () => {
 //ws stuff
 fastify.register(async function (fastify) {
     fastify.get('/ws', { websocket: true }, (socket, req) => {
-
         let pingTimes = 0;
         const interval = setIntervalAsync(async () => {
             if (socket.readyState === socket.OPEN) {
@@ -64,71 +63,76 @@ fastify.register(async function (fastify) {
 
 
         socket.on('message', (message) => {
-            if (Buffer.isBuffer(message)) {
-                const bytes = new Uint8Array(message)
-                const buffer = new DataView(bytes.buffer);
-                let offset = 0;
-                const messageType = buffer.getUint8(offset);
-                offset += 1;
+            try {
+                if (Buffer.isBuffer(message)) {
+                    const bytes = new Uint8Array(message)
+                    const buffer = new DataView(bytes.buffer);
+                    let offset = 0;
+                    const messageType = buffer.getUint8(offset);
+                    offset += 1;
 
-                switch (messageType) {
-                    case utils.ENUM.C2S.TOKEN:
-                        var token = new TextDecoder().decode(buffer.buffer.slice(offset));
-                        let playerData = cache.players[token]
+                    switch (messageType) {
+                        case utils.ENUM.C2S.TOKEN:
+                            var token = new TextDecoder().decode(buffer.buffer.slice(offset));
+                            let playerData = cache.players[token]
 
-                        //auth and create sessions
-                        if (playerData) {
-                            socket.send(Buffer.from([0]))
-                        }
-                        break;
-                    case utils.ENUM.C2S.PING:
-                        console.log(bytes)
-                        break;
-                    case utils.ENUM.C2S.SUB:
-                        var uuidHigh = buffer.getBigUint64(offset);
-                        offset += 8;
-                        var uuidLow = buffer.getBigUint64(offset);
-
-                        var hh = uuidHigh.toString(16).padStart(16, '0');
-                        var lh = uuidLow.toString(16).padStart(16, '0');
-
-                        let uuid_sub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
-                        
-                        //create session
-                        let session = cache.sessions.find(e => e.owner == uuid_sub)
-                        if (!session) cache.sessions.push({
-                            owner: uuid_sub,
-                            member: [] // uuid, ws
-                        })
-
-                        //add uuid to session
-                        cache.sessions.forEach(e => {
-                            if (e.owner != uuid_sub && !e.member.find(_ => _.uuid == uuid_sub)) {
-                                e.member.push({
-                                    ws: socket,
-                                    uuid: uuid_sub
-                                })
+                            //auth and create sessions
+                            if (playerData) {
+                                console.log(playerData.username, "-> connect to MagicFigura successful.")
+                                socket.send(Buffer.from([0]))
                             }
-                        })
-                        break;
-                    case utils.ENUM.C2S.UNSUB:
-                        var uuidHigh = buffer.getBigUint64(offset);
-                        offset += 8;
-                        var uuidLow = buffer.getBigUint64(offset);
-                        var hh = uuidHigh.toString(16).padStart(16, '0');
-                        var lh = uuidLow.toString(16).padStart(16, '0');
+                            break;
+                        case utils.ENUM.C2S.PING:
+                            console.log(bytes)
+                            break;
+                        case utils.ENUM.C2S.SUB:
+                            var uuidHigh = buffer.getBigUint64(offset);
+                            offset += 8;
+                            var uuidLow = buffer.getBigUint64(offset);
 
-                        let uuid_unsub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
-                        break;
-                    default:
-                        console.log(messageType)
+                            var hh = uuidHigh.toString(16).padStart(16, '0');
+                            var lh = uuidLow.toString(16).padStart(16, '0');
+
+                            let uuid_sub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
+
+                            //create session
+                            let session = cache.sessions.find(e => e.owner == uuid_sub)
+                            if (!session) cache.sessions.push({
+                                owner: uuid_sub,
+                                member: [] // uuid, ws
+                            })
+
+                            //add uuid to session
+                            cache.sessions.forEach(e => {
+                                if (e.owner != uuid_sub && !e.member.find(_ => _.uuid == uuid_sub)) {
+                                    e.member.push({
+                                        ws: socket,
+                                        uuid: uuid_sub
+                                    })
+                                }
+                            })
+                            break;
+                        case utils.ENUM.C2S.UNSUB:
+                            var uuidHigh = buffer.getBigUint64(offset);
+                            offset += 8;
+                            var uuidLow = buffer.getBigUint64(offset);
+                            var hh = uuidHigh.toString(16).padStart(16, '0');
+                            var lh = uuidLow.toString(16).padStart(16, '0');
+
+                            let uuid_unsub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
+                            break;
+                        default:
+                            console.log(messageType)
+                    }
                 }
+            } catch (error) {
+                socket.close()
             }
         });
 
-        socket.on('close', () => {
+        socket.on('close', (code) => {
             clearIntervalAsync(interval);
-            console.log('Client disconnected');
+            console.warn('Client disconnected code:', code);
         });
 
         socket.on('error', (error) => {
