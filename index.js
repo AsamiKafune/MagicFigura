@@ -117,10 +117,10 @@ fastify.register(async function (fastify) {
                             var uuidHigh = buffer.getBigUint64(offset);
                             offset += 8;
                             var uuidLow = buffer.getBigUint64(offset);
-
                             var hh = uuidHigh.toString(16).padStart(16, '0');
                             var lh = uuidLow.toString(16).padStart(16, '0');
-                            let uuid_sub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
+                            let uuid_sub = utils.parseUUID(hh + lh)
+                            console.log(uuid_sub)
                             break;
                         case utils.ENUM.C2S.UNSUB:
                             var uuidHigh = buffer.getBigUint64(offset);
@@ -128,8 +128,8 @@ fastify.register(async function (fastify) {
                             var uuidLow = buffer.getBigUint64(offset);
                             var hh = uuidHigh.toString(16).padStart(16, '0');
                             var lh = uuidLow.toString(16).padStart(16, '0');
-
-                            let uuid_unsub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
+                            let uuid_unsub = utils.parseUUID(hh + lh)
+                            console.log(uuid_unsub)
                             break;
                         default:
                             console.log(messageType)
