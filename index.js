@@ -85,25 +85,27 @@ fastify.register(async function (fastify) {
                             break;
                         case utils.ENUM.C2S.PING:
 
-                            var _wsIdentify = cache.wsData.get(socket);
-                            var parts = _wsIdentify.split('-');
-                            var hh = parts[0] + parts[1] + parts[2]
-                            var lh = parts[3] + parts[4]
-                            var uuidHigh = BigInt('0x' + hh);
-                            var uuidLow = BigInt('0x' + lh);
+                            // var _wsIdentify = cache.wsData.get(socket);
+                            // var parts = _wsIdentify.split('-');
+                            // var hh = parts[0] + parts[1] + parts[2]
+                            // var lh = parts[3] + parts[4]
+                            // var uuidHigh = BigInt('0x' + hh);
+                            // var uuidLow = BigInt('0x' + lh);
 
-                            buffer.setUint8(offset, utils.ENUM.S2C.PING)
-                            offset += 1
-                            buffer.setBigInt64(offset, uuidHigh, true)
-                            offset += 8
-                            buffer.setBigInt64(offset, uuidLow, true)
-                            offset += 8
-                            buffer.setInt32(offset,)
+                            // buffer.setUint8(offset, utils.ENUM.S2C.PING)
+                            // offset += 1
+                            // buffer.setBigInt64(offset, uuidHigh, true)
+                            // offset += 8
+                            // buffer.setBigInt64(offset, uuidLow, true)
+                            // offset += 8
+                            // buffer.setInt32(offset,)
 
-                            let bc = cache.sessions.find(e => e.owner == _wsIdentify)
-                            bc.member.forEach(e => {
-                                e.ws.send(buffer)
-                            })
+                            // let bc = cache.sessions.find(e => e.owner == _wsIdentify)
+                            // bc.member.forEach(e => {
+                            //     e.ws.send(buffer)
+                            // })
+
+                            
                             break;
                         case utils.ENUM.C2S.SUB:
                             var uuidHigh = buffer.getBigUint64(offset);
@@ -153,11 +155,12 @@ fastify.register(async function (fastify) {
 
         socket.on('close', (code) => {
             clearIntervalAsync(interval);
-            console.warn('Client disconnected code:', code);
+            cache.wsData.delete(socket);
         });
 
         socket.on('error', (error) => {
             clearIntervalAsync(interval);
+            cache.wsData.delete(socket);
             console.error('WebSocket error:', error);
         });
 
