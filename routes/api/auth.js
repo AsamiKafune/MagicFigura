@@ -2,6 +2,7 @@ const cache = require("../../cache")
 const utils = require("../../utils")
 const axios = require("axios")
 const whitelist = require("../../utils/whitelists")
+const ban = require("../../utils/banned")
 
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
@@ -14,9 +15,14 @@ module.exports = (fastify, opts, done) => {
         if (!username) {
             return res.code(400).send("Username is required")
         }
+        const isBan = await ban.banCheck(username);
+        if(isBan) {
+            console.log(username+" -> failed to connect (banned)")
+            return res.code(403).send("you got banned! contact support")
+        }
+
         cache.serverIds[server_id] = username;
         return res.send(server_id);
-
     })
 
     //verify account

@@ -3,7 +3,7 @@ const { setIntervalAsync, clearIntervalAsync } = require('set-interval-async');
 const { Buffer } = require('buffer');
 const conf = require("./config");
 const utils = require("./utils");
-const cache = require("./cache")
+const cache = require("./cache");
 
 //cors origin bypass
 fastify.options('*', function (request, reply) {
@@ -62,7 +62,7 @@ fastify.register(async function (fastify) {
         }, 2000);
 
 
-        socket.on('message', (message) => {
+        socket.on('message', async (message) => {
             try {
                 if (Buffer.isBuffer(message)) {
                     const bytes = new Uint8Array(message)
@@ -82,6 +82,7 @@ fastify.register(async function (fastify) {
                                 cache.wsData.set(socket, playerData.uuid)
                                 socket.send(Buffer.from([0]))
                             }
+
                             break;
                         case utils.ENUM.C2S.PING:
 
