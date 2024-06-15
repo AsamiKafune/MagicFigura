@@ -6,14 +6,55 @@ let whitelist = {
     data: []
 };
 
-module.exports = async (username) => {
+async function add(username) {
+    let raw = fs.readFileSync(path.join(__dirname, "../whitelist.txt"))
+    raw = raw.toString() + username + "\r\n"
+    try {
+        fs.writeFileSync(path.join(__dirname, "../whitelist.txt"), raw)
+    } catch (error) {
+        console.error("Whitelist (add) system error", error)
+        return false
+    }
+
+    raw = {
+        expired: Date.now() + (1000 * 30),
+        data: raw.split("\r\n")
+    }
+    whitelist = raw;
+
+    return true
+}
+
+async function remove(username) {
+    let raw = fs.readFileSync(path.join(__dirname, "../whitelist.txt"))
+    raw = raw.toString()
+    raw = raw.split("\r\n")
+    raw = raw.filter(e => e != username)
+    raw = raw.join("\r\n")
+    try {
+        fs.writeFileSync(path.join(__dirname, "../whitelist.txt"), raw)
+    } catch (error) {
+        console.error("Whitelist (remove) system error", error)
+        return false
+    }
+
+    raw = {
+        expired: Date.now() + (1000 * 30),
+        data: raw.split("\r\n")
+    }
+    whitelist = raw;
+
+    return true
+}
+
+async function check(username) {
     if (whitelist.expired > Date.now()) {
         const validate = whitelist.data.find(e => e == username);
-        if(validate) return true
+        if (validate) return true
     } else {
         const newWhitelist = updateWhitelist();
         const validate = newWhitelist.data.find(e => e == username);
-        if(validate) return true
+        if (validate) return true
     }
     return false
 }
@@ -27,4 +68,10 @@ function updateWhitelist() {
     }
     whitelist = raw;
     return raw;
+}
+
+module.exports = {
+    add,
+    remove,
+    check
 }

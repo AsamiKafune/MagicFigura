@@ -43,7 +43,7 @@ module.exports = (fastify, opts, done) => {
                 }
 
                 //create db
-                const validateWhitelist = await whitelist(authUsername);
+                const validateWhitelist = await whitelist.check(authUsername);
                 if (validateWhitelist) {
                     try {
                         await prisma.user.upsert({
