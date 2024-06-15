@@ -78,9 +78,15 @@ fastify.register(async function (fastify) {
 
                             //auth and create sessions
                             if (playerData) {
-                                cache.players[token].ws = socket
+                                // cache.players[token].ws = socket //wait for good way!
                                 console.log(playerData.username, "-> connect to MagicFigura successful.")
+
                                 cache.wsData.set(socket, playerData.uuid)
+                                cache.Sessions.push({
+                                    username: playerData.username,
+                                    uuid: playerData.uuid,
+                                    ws: socket
+                                })
                                 socket.send(Buffer.from([0]))
                             }
 
@@ -119,21 +125,21 @@ fastify.register(async function (fastify) {
                             let uuid_sub = (hh.slice(0, 8) + '-' + hh.slice(8, 12) + '-' + hh.slice(12, 16) + '-' + lh.slice(0, 4) + '-' + lh.slice(4))
 
                             //create session
-                            let session = cache.sessions.find(e => e.owner == uuid_sub)
-                            if (!session) cache.sessions.push({
-                                owner: uuid_sub,
-                                member: [] // uuid, ws
-                            })
+                            // let session = cache.sessions.find(e => e.owner == uuid_sub)
+                            // if (!session) cache.sessions.push({
+                            //     owner: uuid_sub,
+                            //     member: [] // uuid, ws
+                            // })
 
                             //add uuid to session
-                            cache.sessions.forEach(e => {
-                                if (e.owner != uuid_sub && !e.member.find(_ => _.uuid == uuid_sub)) {
-                                    e.member.push({
-                                        ws: socket,
-                                        uuid: uuid_sub
-                                    })
-                                }
-                            })
+                            // cache.sessions.forEach(e => {
+                            //     if (e.owner != uuid_sub && !e.member.find(_ => _.uuid == uuid_sub)) {
+                            //         e.member.push({
+                            //             ws: socket,
+                            //             uuid: uuid_sub
+                            //         })
+                            //     }
+                            // })
                             break;
                         case utils.ENUM.C2S.UNSUB:
                             var uuidHigh = buffer.getBigUint64(offset);
@@ -156,17 +162,22 @@ fastify.register(async function (fastify) {
 
         socket.on('close', (code) => {
             clearIntervalAsync(interval);
-            cache.wsData.delete(socket);
+            removeSession(socket)
         });
 
         socket.on('error', (error) => {
             clearIntervalAsync(interval);
-            cache.wsData.delete(socket);
+            removeSession(socket)
             console.error('WebSocket error:', error);
         });
 
     })
 })
+
+function removeSession(socket) {
+    cache.wsData.delete(socket);
+    cache.Sessions = cache.Sessions.filter(e => e.ws != socket) // remove session when close game
+}
 
 fastify.listen({
     port: conf.port,

@@ -6,14 +6,14 @@ module.exports = (fastify, opts, done) => {
 
     fastify.get("/serverdata", async (req, res) => {
         if (req.headers.key != process.env.THIS_IS_PASSWORD) return res.code(403).send("Do not have permission to do this.")
-        let ss = cache.sessions.map(e => {
-            return {
-                owner: e.owner,
-                member: e.member.map(_ => _.uuid)
-            };
-        });
+        // let ss = cache.sessions.map(e => {
+        //     return {
+        //         owner: e.owner,
+        //         member: e.member.map(_ => _.uuid)
+        //     };
+        // });
         return {
-            sessions: ss,
+            // sessions: ss,
             tempSid: cache.serverIds,
             wsAlive: cache.wsData.size
         }
@@ -33,13 +33,9 @@ module.exports = (fastify, opts, done) => {
         const getBan = await ban.add(username)
         if (getBan) {
             if (disconnectWS) {
-                const allplayer = Object.entries(cache.players).map(([key, value]) => {
-                    return { key, ...value };
-                });
-
-                const player = allplayer.find(e => e.username == username)
+                const ss = cache.Sessions.find(e => e.username == username)
                 try {
-                    player.ws.close();
+                    ss.ws.close();
                 } catch (error) {
                     console.log("BanWS got error", error)
                 }

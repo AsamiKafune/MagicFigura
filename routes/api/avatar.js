@@ -50,8 +50,16 @@ module.exports = (fastify, opts, done) => {
 
         console.info(`${playerData.username} (${playerData.uuid}) upload successful.`);
 
-        let bc = cache.sessions.find(e => e.owner == playerData.uuid)
-        bc.member.forEach(e => {
+        // let bc = cache.sessions.find(e => e.owner == playerData.uuid)
+        // bc.member.forEach(e => {
+        //     try {
+        //         sendEvent(e.ws, playerData.uuid)
+        //     } catch (error) {
+        //         console.log("Boardcast equip avatar error", error)
+        //     }
+        // })
+
+        cache.Sessions.forEach(e => {
             try {
                 sendEvent(e.ws, playerData.uuid)
             } catch (error) {
@@ -82,14 +90,23 @@ module.exports = (fastify, opts, done) => {
         const playerData = req.user["data"];
         fs.unlinkSync(path.join(__dirname, "../../avatars", playerData.uuid + ".moon"))
 
-        let bc = cache.sessions.find(e => e.owner == playerData.uuid)
-        bc.member.forEach(e => {
+        // let bc = cache.sessions.find(e => e.owner == playerData.uuid)
+        // bc.member.forEach(e => {
+        //     try {
+        //         sendEvent(e.ws, playerData.uuid)
+        //     } catch (error) {
+        //         console.log("Boardcast delete avatar error", error)
+        //     }
+        // })
+
+        cache.Sessions.forEach(e => {
             try {
                 sendEvent(e.ws, playerData.uuid)
             } catch (error) {
                 console.log("Boardcast delete avatar error", error)
             }
         })
+
         return "ok"
     })
 
