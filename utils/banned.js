@@ -8,17 +8,39 @@ let banList = {
 
 async function add(username) {
     let raw = fs.readFileSync(path.join(__dirname, "../banned.txt"))
-    raw = raw.toString() + "\r\n" + username
+    raw = raw.toString() + username + "\r\n"
     try {
         fs.writeFileSync(path.join(__dirname, "../banned.txt"), raw)
     } catch (error) {
-        console.error("Ban system error", error)
+        console.error("Ban (add) system error", error)
         return false
     }
 
     raw = {
         expired: Date.now() + (1000 * 30),
-        data: raw
+        data: raw.split("\r\n")
+    }
+    banList = raw;
+
+    return true
+}
+
+async function remove(username) {
+    let raw = fs.readFileSync(path.join(__dirname, "../banned.txt"))
+    raw = raw.toString()
+    raw = raw.split("\r\n")
+    raw = raw.filter(e => e != username)
+    raw = raw.join("\r\n")
+    try {
+        fs.writeFileSync(path.join(__dirname, "../banned.txt"), raw)
+    } catch (error) {
+        console.error("Ban (remove) system error", error)
+        return false
+    }
+
+    raw = {
+        expired: Date.now() + (1000 * 30),
+        data: raw.split("\r\n")
     }
     banList = raw;
 
@@ -50,5 +72,6 @@ function updateList() {
 
 module.exports = {
     banCheck,
+    remove,
     add
 }

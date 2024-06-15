@@ -16,7 +16,7 @@ module.exports = {
         },
         "limits": {
             "maxAvatarSize": 100000,
-            "maxAvatars": 10,
+            "maxAvatars": 5,
             "allowedBadges": {
                 "special": Array(6).fill(0),
                 "pride": Array(26).fill(0)

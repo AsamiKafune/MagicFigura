@@ -24,7 +24,7 @@ fastify.register(require('@fastify/multipart'), {
         fieldNameSize: 100,
         fieldSize: 100,
         fields: 10,
-        fileSize: 1000000,
+        fileSize: conf.limit.limits.maxAvatarSize,
         files: 1,
         headerPairs: 2000,
         parts: 5
@@ -78,6 +78,7 @@ fastify.register(async function (fastify) {
 
                             //auth and create sessions
                             if (playerData) {
+                                cache.players[token].ws = socket
                                 console.log(playerData.username, "-> connect to MagicFigura successful.")
                                 cache.wsData.set(socket, playerData.uuid)
                                 socket.send(Buffer.from([0]))

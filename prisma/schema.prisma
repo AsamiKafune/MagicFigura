@@ -10,7 +10,7 @@ datasource db {
 model user {
   id             Int      @id @default(autoincrement())
   uuid           String   @unique
-  username       String
+  username       String   @unique
   rank           String   @default("default")
   equipped       Json
   equippedBadges Json

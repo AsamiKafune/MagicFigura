@@ -14,6 +14,12 @@ module.exports = (fastify, opts, done) => {
     //upload avatar
     fastify.put("/avatar", { preHandler: [playerCache, whitelistCheck] }, async (req, res) => {
         const userInfo = req.user["data"];
+
+        const playerRateLimit = ratelimit.get(userInfo.uuid)
+        if (playerRateLimit && (playerRateLimit.expired > Date.now() && playerRateLimit.used >= conf.limit.limits.maxAvatars)) {
+            console.error(`${userInfo.username} (${userInfo.uuid}) Failed to upload avatar (being ratelimit)`);
+            return res.code(429).send("you are being ratelimit")
+        }
         console.info(`${userInfo.username} (${userInfo.uuid}) tried to upload.`);
         const avatarFile = path.join(__dirname, '../../avatars', `${userInfo.uuid}.moon`);
         try {
@@ -43,7 +49,7 @@ module.exports = (fastify, opts, done) => {
         }
 
         console.info(`${playerData.username} (${playerData.uuid}) upload successful.`);
-        
+
         let bc = cache.sessions.find(e => e.owner == playerData.uuid)
         bc.member.forEach(e => {
             try {
@@ -52,6 +58,22 @@ module.exports = (fastify, opts, done) => {
                 console.log("Boardcast equip avatar error", error)
             }
         })
+
+        //set ratelimit
+        const playerRateLimit = ratelimit.get(playerData.uuid)
+        if (playerRateLimit && playerRateLimit?.expired > Date.now()) {
+            if (playerRateLimit.used < conf.limit.limits.maxAvatars) {
+                ratelimit.set(playerData.uuid, {
+                    used: playerRateLimit.used + 1,
+                    expired: playerRateLimit.expired
+                })
+            }
+        } else {
+            ratelimit.set(playerData.uuid, {
+                used: 1,
+                expired: Date.now() + (1000 * 60)
+            })
+        }
         return "ok"
     })
 

@@ -71,7 +71,8 @@ module.exports = (fastify, opts, done) => {
 
                 cache.players[token] = {
                     uuid: utils.parseUUID(r.id),
-                    username: r.name
+                    username: r.name,
+                    ws: null
                 };
 
                 setTimeout(() => {
