@@ -1,6 +1,10 @@
 const cache = require("../../cache")
 const utils = require("../../utils")
 const axios = require("axios")
+const whitelist = require("../../utils/whitelists")
+
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 
 module.exports = (fastify, opts, done) => {
     //get serverid for verify
@@ -32,6 +36,33 @@ module.exports = (fastify, opts, done) => {
                     return res.code(500).send('Failed to retrieve data from the "Mojang" API');
                 }
 
+                //create db
+                const validateWhitelist = await whitelist(authUsername);
+                if (validateWhitelist) {
+                    try {
+                        await prisma.user.upsert({
+                            where: {
+                                uuid: utils.parseUUID(r.id),
+                            },
+                            create: {
+                                username: authUsername,
+                                uuid: utils.parseUUID(r.id),
+                                equipped: [],
+                                equippedBadges: {
+                                    "special": Array(6).fill(0),
+                                    "pride": Array(26).fill(0)
+                                }
+                            },
+                            update: {
+                                username: authUsername,
+                                lastUsed: new Date()
+                            }
+                        })
+                    } catch (error) {
+                        console.log("UpdateData Error: ",error);
+                    }
+                }
+
                 cache.players[token] = {
                     uuid: utils.parseUUID(r.id),
                     username: r.name
@@ -40,7 +71,7 @@ module.exports = (fastify, opts, done) => {
                 setTimeout(() => {
                     delete cache.serverIds[serverId] // clear cache serverId
                 }, 20000);
-            
+
                 return res.send(token);
             } catch (error) {
                 console.error(error);

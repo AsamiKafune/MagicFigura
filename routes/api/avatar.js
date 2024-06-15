@@ -6,6 +6,10 @@ const path = require("path")
 const playerCache = require("../../middleware/playerCache")
 const whitelistCheck = require("../../middleware/whitelist")
 
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
+const ratelimit = new Map();
+
 module.exports = (fastify, opts, done) => {
     //upload avatar
     fastify.put("/avatar", { preHandler: [playerCache, whitelistCheck] }, async (req, res) => {
@@ -14,9 +18,17 @@ module.exports = (fastify, opts, done) => {
         const avatarFile = path.join(__dirname, '../../avatars', `${userInfo.uuid}.moon`);
         try {
             await fs.promises.writeFile(avatarFile, req.body);
+            await prisma.user.update({
+                where: {
+                    uuid: userInfo.uuid
+                },
+                data: {
+                    lastUsed: new Date(),
+                }
+            })
             return res.send('success');
         } catch (error) {
-            console.error(error);
+            console.error(`${userInfo.username} (${userInfo.uuid}) Failed to upload avatar, error`, error);
             return res.code(500).send('Failed to upload avatar.');
         }
     })
@@ -27,7 +39,11 @@ module.exports = (fastify, opts, done) => {
         console.info(`${playerData.username} (${playerData.uuid}) upload successful.`);
         let bc = cache.sessions.find(e => e.owner == playerData.uuid)
         bc.member.forEach(e => {
-            sendEvent(e.ws, playerData.uuid)
+            try {
+                sendEvent(e.ws, playerData.uuid)
+            } catch (error) {
+                console.log("Boardcast equip avatar error", error)
+            }
         })
         return "ok"
     })
@@ -39,7 +55,11 @@ module.exports = (fastify, opts, done) => {
 
         let bc = cache.sessions.find(e => e.owner == playerData.uuid)
         bc.member.forEach(e => {
-            sendEvent(e.ws, playerData.uuid)
+            try {
+                sendEvent(e.ws, playerData.uuid)
+            } catch (error) {
+                console.log("Boardcast delete avatar error", error)
+            }
         })
         return "ok"
     })
@@ -75,7 +95,7 @@ module.exports = (fastify, opts, done) => {
 
             let userInfoResponse = {
                 uuid: uuid,
-                rank: 'default',
+                rank: 'No whitelist',
                 equipped: [],
                 equippedBadges: {
                     special: Array(6).fill(0),
@@ -83,8 +103,15 @@ module.exports = (fastify, opts, done) => {
                 },
                 banned: false,
                 version: conf.version.release,
-                lastUsed: new Date()
+                lastUsed: "no whitelist..."
             };
+
+            const playerData = await prisma.user.findFirst({
+                where: {
+                    uuid: uuid
+                }
+            }).catch(() => { })
+            if (playerData) userInfoResponse = playerData
 
             try {
                 const file = fs.statSync(avatarFile)
