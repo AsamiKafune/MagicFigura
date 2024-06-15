@@ -105,7 +105,6 @@ fastify.register(async function (fastify) {
                             //     e.ws.send(buffer)
                             // })
 
-                            
                             break;
                         case utils.ENUM.C2S.SUB:
                             var uuidHigh = buffer.getBigUint64(offset);
