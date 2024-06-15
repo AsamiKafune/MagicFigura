@@ -8,7 +8,7 @@ let banList = {
 
 async function add(username) {
     let raw = fs.readFileSync(path.join(__dirname, "../banned.txt"))
-    raw = raw.toString() + username + "\r\n"
+    raw = raw.toString() + "\r\n" + username
     try {
         fs.writeFileSync(path.join(__dirname, "../banned.txt"), raw)
     } catch (error) {

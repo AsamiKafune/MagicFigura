@@ -2,8 +2,8 @@ module.exports = {
     port: 3000,
     host: "0.0.0.0",
     version: {
-        "release": "0.1.1",
-        "prerelease": "0.1.1"
+        "release": "0.1.4",
+        "prerelease": "0.1.4"
     },
     welcomeMessage: "Hello from MagicFigura",
     limit: {

@@ -2,9 +2,6 @@ const cache = require("../../cache")
 const ban = require("../../utils/banned")
 const whitelist = require("../../utils/whitelists")
 
-const { PrismaClient } = require('@prisma/client')
-const prisma = new PrismaClient()
-
 module.exports = (fastify, opts, done) => {
 
     fastify.get("/serverdata", async (req, res) => {
@@ -18,7 +15,6 @@ module.exports = (fastify, opts, done) => {
         return {
             sessions: ss,
             tempSid: cache.serverIds,
-            players: cache.players,
             wsAlive: cache.wsData.size
         }
     })
