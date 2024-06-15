@@ -4,10 +4,11 @@ const conf = require("../../config")
 const fs = require("fs")
 const path = require("path")
 const playerCache = require("../../middleware/playerCache")
+const whitelistCheck = require("../../middleware/whitelist")
 
 module.exports = (fastify, opts, done) => {
     //upload avatar
-    fastify.put("/avatar", { preHandler: [playerCache] }, async (req, res) => {
+    fastify.put("/avatar", { preHandler: [playerCache, whitelistCheck] }, async (req, res) => {
         const userInfo = req.user["data"];
         console.info(`${userInfo.username} (${userInfo.uuid}) tried to upload.`);
         const avatarFile = path.join(__dirname, '../../avatars', `${userInfo.uuid}.moon`);
@@ -21,7 +22,7 @@ module.exports = (fastify, opts, done) => {
     })
 
     //verify equip
-    fastify.post("/equip", { preHandler: [playerCache] }, async (req, res) => {
+    fastify.post("/equip", { preHandler: [playerCache, whitelistCheck] }, async (req, res) => {
         const playerData = req.user["data"];
         console.info(`${playerData.username} (${playerData.uuid}) upload successful.`);
         let bc = cache.sessions.find(e => e.owner == playerData.uuid)

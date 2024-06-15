@@ -1,11 +1,11 @@
 module.exports = {
     port: 3000,
     host: "0.0.0.0",
-    welcomeMessage: "Hello from MagicFigura V2 (0.1b)",
     version: {
-        "release": "0.1.4",
-        "prerelease": "0.1.4"
+        "release": "0.1.1",
+        "prerelease": "0.1.1"
     },
+    welcomeMessage: "Hello from MagicFigura",
     limit: {
         "rate": {
             "pingSize": 1024,
@@ -53,7 +53,7 @@ module.exports = {
         },
         {
             "color": "green",
-            "text": "if you want to selfhost figura\n contact me https://kfn.moe"
+            "text": "if you want to selfhost figura backend\n contact me https://kfn.moe"
         }
     ]
 }

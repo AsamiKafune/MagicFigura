@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id             Int      @id @default(autoincrement())
+  uuid           String   @unique
+  username       String
+  rank           String
+  equipped       Json
+  equippedBadges Json
+  banned         Boolean  @default(false)
+  lastUsed       DateTime @default(now())
+}
