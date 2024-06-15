@@ -2,3 +2,4 @@
 /avatars
 *.lock
 .vscode
+whitelist.txt

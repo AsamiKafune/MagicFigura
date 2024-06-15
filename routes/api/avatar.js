@@ -18,14 +18,6 @@ module.exports = (fastify, opts, done) => {
         const avatarFile = path.join(__dirname, '../../avatars', `${userInfo.uuid}.moon`);
         try {
             await fs.promises.writeFile(avatarFile, req.body);
-            await prisma.user.update({
-                where: {
-                    uuid: userInfo.uuid
-                },
-                data: {
-                    lastUsed: new Date(),
-                }
-            })
             return res.send('success');
         } catch (error) {
             console.error(`${userInfo.username} (${userInfo.uuid}) Failed to upload avatar, error`, error);
@@ -36,7 +28,22 @@ module.exports = (fastify, opts, done) => {
     //verify equip
     fastify.post("/equip", { preHandler: [playerCache, whitelistCheck] }, async (req, res) => {
         const playerData = req.user["data"];
+
+        try {
+            await prisma.user.update({
+                where: {
+                    uuid: playerData.uuid
+                },
+                data: {
+                    lastUsed: new Date(),
+                }
+            })
+        } catch (error) {
+            console.error(`${playerData.username} (${playerData.uuid}) update database failed.`);
+        }
+
         console.info(`${playerData.username} (${playerData.uuid}) upload successful.`);
+        
         let bc = cache.sessions.find(e => e.owner == playerData.uuid)
         bc.member.forEach(e => {
             try {
