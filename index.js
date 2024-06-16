@@ -10,9 +10,12 @@ fastify.options('*', function (request, reply) {
     reply.send()
 });
 
-fastify.addHook('onSend', function (request, reply, payload, next) {
-    reply.header('Access-Control-Allow-Origin', '*')
-    reply.header('Access-Control-Allow-Headers', '*')
+fastify.addHook('onSend', (req, res, payload, next) => {
+
+    console.info("Request ->", req.raw.url)
+
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Headers', '*')
     next()
 });
 
@@ -108,9 +111,9 @@ fastify.register(async function (fastify) {
                             uuidb = Buffer.from(wsIdentify.replace(/-/g, ''), 'hex');
                             uuidb.copy(buf2, 1)
                             Buffer.from(new Uint8Array(data.buffer)).copy(buf2, 17);
-                            
+
                             let bc = cache.localSessions.get(socket)
-                            if(bc) {
+                            if (bc) {
                                 bc.forEach(e => {
                                     e.send(buf2)
                                 })
@@ -157,7 +160,7 @@ fastify.register(async function (fastify) {
 
                             //call everyplayer in world remove self socket
                             let onlinePlayer = (cache.sessions.find(e => (e.uuid == uuid_unsub) && (e.ws != socket)))?.ws
-                            if(onlinePlayer) {
+                            if (onlinePlayer) {
                                 let onlineSession = cache.localSessions.get(onlinePlayer)
                                 if (!onlineSession) onlineSession = []
                                 onlineSession = onlineSession.filter(e => e != socket)

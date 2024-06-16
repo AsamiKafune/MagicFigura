@@ -1,3 +1,6 @@
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
+
 const cache = require("../../cache")
 const ban = require("../../utils/banned")
 const whitelist = require("../../utils/whitelists")
@@ -27,15 +30,22 @@ module.exports = (fastify, opts, done) => {
         const getBan = await ban.add(username)
         if (getBan) {
             if (disconnectWS) {
-                const ss = cache.sessions.find(e => e.username == username)
+                const session = cache.sessions.find(e => e.username == username)
                 try {
-                    ss.ws.close();
+                    session.ws.close();
                 } catch (error) {
                     console.log("BanWS got error", error)
                 }
             }
-            const check = await whitelist.check(username)
-            if (check) await whitelist.remove(username).catch(() => {})
+            const isWhitelist = await whitelist.check(username)
+            if (isWhitelist) {
+                await whitelist.remove(username).catch(() => { })
+                await prisma.user.delete({
+                    where: {
+                        username: username
+                    }
+                }).catch(() => { })
+            }
 
             return "user has been banned from system"
         }
