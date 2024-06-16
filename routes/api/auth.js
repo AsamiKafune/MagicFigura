@@ -16,8 +16,8 @@ module.exports = (fastify, opts, done) => {
             return res.code(400).send("Username is required")
         }
         const isBan = await ban.banCheck(username);
-        if(isBan) {
-            console.log(username+" -> failed to connect (banned)")
+        if (isBan) {
+            console.log(username + " -> failed to connect (banned)")
             return res.code(403).send("you got banned! contact support")
         }
 
@@ -65,19 +65,18 @@ module.exports = (fastify, opts, done) => {
                             }
                         })
                     } catch (error) {
-                        console.log("UpdateData Error: ",error);
+                        console.log("UpdateData Error: ", error);
                     }
                 }
 
-                cache.players[token] = {
+                cache.players.set(token, {
                     uuid: utils.parseUUID(r.id),
-                    username: r.name,
-                    ws: null
-                };
+                    username: r.name
+                })
 
                 setTimeout(() => {
                     delete cache.serverIds[serverId] // clear cache serverId
-                }, 20000);
+                }, 10000);
 
                 return res.send(token);
             } catch (error) {

@@ -76,7 +76,7 @@ fastify.register(async function (fastify) {
 
                     if (messageType == utils.ENUM.C2S.TOKEN) {
                         const token = new TextDecoder().decode(buffer.buffer.slice(offset));
-                        const player = cache.players[token]
+                        const player = cache.players.get(token)
 
                         //auth and create sessions
                         if (player) {
