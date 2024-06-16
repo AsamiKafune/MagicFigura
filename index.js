@@ -108,9 +108,13 @@ fastify.register(async function (fastify) {
                             uuidb = Buffer.from(wsIdentify.replace(/-/g, ''), 'hex');
                             uuidb.copy(buf2, 1)
                             Buffer.from(new Uint8Array(data.buffer)).copy(buf2, 17);
-                            cache.sessions.forEach(e => {
-                                if (e.uuid != wsIdentify) e.ws.send(buf2)
-                            })
+                            
+                            let bc = cache.localSessions.get(socket)
+                            if(bc) {
+                                bc.forEach(e => {
+                                    e.send(buf2)
+                                })
+                            }
 
                             break;
                         case utils.ENUM.C2S.SUB:
@@ -120,7 +124,25 @@ fastify.register(async function (fastify) {
                             var hh = uuidHigh.toString(16).padStart(16, '0');
                             var lh = uuidLow.toString(16).padStart(16, '0');
                             let uuid_sub = utils.parseUUID(hh + lh)
-                            console.log(uuid_sub)
+
+                            //self register
+                            let localSession = cache.localSessions.get(socket)
+                            if (!localSession) localSession = []
+                            let player2 = (cache.sessions.find(e => (e.uuid == uuid_sub) && (e.ws != socket)))?.ws
+                            if (player2) {
+                                localSession.push(player2)
+                                cache.localSessions.set(socket, localSession)
+                            }
+
+                            //call everyplayer in world add self socket
+                            let otherWS = (cache.sessions.find(e => (e.uuid == uuid_sub) && (e.ws != socket)))?.ws
+                            if (otherWS) {
+                                let otherPlayer = cache.localSessions.get(otherWS)
+                                if (!otherPlayer) otherPlayer = []
+                                otherPlayer.push(socket)
+                                cache.localSessions.set(otherWS, otherPlayer)
+                            }
+
                             break;
                         case utils.ENUM.C2S.UNSUB:
                             var uuidHigh = buffer.getBigUint64(offset);
@@ -129,7 +151,19 @@ fastify.register(async function (fastify) {
                             var hh = uuidHigh.toString(16).padStart(16, '0');
                             var lh = uuidLow.toString(16).padStart(16, '0');
                             let uuid_unsub = utils.parseUUID(hh + lh)
-                            console.log(uuid_unsub)
+
+                            // remove self
+                            cache.localSessions.delete(socket)
+
+                            //call everyplayer in world remove self socket
+                            let onlinePlayer = (cache.sessions.find(e => (e.uuid == uuid_unsub) && (e.ws != socket)))?.ws
+                            if(onlinePlayer) {
+                                let onlineSession = cache.localSessions.get(onlinePlayer)
+                                if (!onlineSession) onlineSession = []
+                                onlineSession = onlineSession.filter(e => e != socket)
+                                cache.localSessions.set(onlinePlayer, onlineSession)
+                            }
+
                             break;
                         default:
                             console.log(messageType)
@@ -158,6 +192,7 @@ fastify.register(async function (fastify) {
 function removeSession(socket) {
     cache.wsData.delete(socket);
     cache.sessions = cache.sessions.filter(e => e.ws != socket) // remove session when close game
+    cache.localSessions.delete(socket) // remove localSessions when close game
 }
 
 fastify.listen({
