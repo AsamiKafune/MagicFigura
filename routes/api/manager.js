@@ -10,9 +10,15 @@ module.exports = (fastify, opts, done) => {
     fastify.get("/serverdata", async (req, res) => {
         if (req.headers.key != process.env.THIS_IS_PASSWORD) return res.code(403).send("Do not have permission to do this.")
         return {
-            connectSize: cache.sessions.length,
-            tempSid: cache.serverIds,
-            wsAlive: cache.wsData.size
+            info: {
+                databaseCount: await prisma.user.count(),
+                whitelists: 0,
+                banned: 0,
+            },
+            network: {
+                connected: cache.sessions.length,
+                sessions: cache.localSessions.size
+            }
         }
     })
 

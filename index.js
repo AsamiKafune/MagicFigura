@@ -74,102 +74,89 @@ fastify.register(async function (fastify) {
                     const messageType = buffer.getUint8(offset);
                     offset += 1;
 
-                    switch (messageType) {
-                        case utils.ENUM.C2S.TOKEN:
-                            var token = new TextDecoder().decode(buffer.buffer.slice(offset));
-                            let playerData = cache.players[token]
+                    if (messageType == utils.ENUM.C2S.TOKEN) {
+                        const token = new TextDecoder().decode(buffer.buffer.slice(offset));
+                        const player = cache.players[token]
 
-                            //auth and create sessions
-                            if (playerData) {
-                                console.log(playerData.username, "-> connect to MagicFigura successful.")
+                        //auth and create sessions
+                        if (player) {
+                            console.log(player.username, "-> connect to MagicFigura successful.")
 
-                                cache.wsData.set(socket, playerData.uuid)
-                                cache.sessions.push({
-                                    username: playerData.username,
-                                    uuid: playerData.uuid,
-                                    ws: socket
-                                })
-                                socket.send(Buffer.from([0]))
-                            }
+                            cache.wsData.set(socket, player.uuid)
+                            cache.sessions.push({
+                                username: player.username,
+                                uuid: player.uuid,
+                                ws: socket
+                            })
+                            socket.send(Buffer.from([0]))
+                        }
+                    } else if (messageType == utils.ENUM.C2S.PING) {
+                        const uuid = cache.wsData.get(socket);
+                        const bytesToReplace = Buffer.from(buffer.buffer.slice(1));
 
-                            break;
-                        case utils.ENUM.C2S.PING:
-                            var wsIdentify = cache.wsData.get(socket);
-                            var existingBuffer = buffer.buffer;
-                            var bytesToReplace = Buffer.from(existingBuffer.slice(1));
+                        let bbf = new ArrayBuffer(6);
+                        let bbfv = new DataView(bbf);
 
-                            var bbf = new ArrayBuffer(6);
-                            var bbfv = new DataView(bbf);
+                        for (var i = 0; i < 6; i++) {
+                            bbfv.setInt8(i, bytesToReplace[i]);
+                        }
 
-                            for (var i = 0; i < 6; i++) {
-                                bbfv.setInt8(i, bytesToReplace[i]);
-                            }
+                        const buf2 = Buffer.alloc(1 + 16 + bbfv.byteLength)
+                        buf2.writeUint8(1, 0);
+                        const uuidb = Buffer.from(uuid.replace(/-/g, ''), 'hex');
+                        uuidb.copy(buf2, 1)
+                        Buffer.from(new Uint8Array(bbfv.buffer)).copy(buf2, 17);
 
-                            var data = bbfv;
-                            var buf2 = Buffer.alloc(1 + 16 + data.byteLength)
-                            buf2.writeUint8(1, 0);
-                            uuidb = Buffer.from(wsIdentify.replace(/-/g, ''), 'hex');
-                            uuidb.copy(buf2, 1)
-                            Buffer.from(new Uint8Array(data.buffer)).copy(buf2, 17);
+                        const bc = cache.localSessions.get(socket)
+                        if (bc) {
+                            bc.forEach(e => {
+                                e.send(buf2)
+                            })
+                        }
+                    } else if (messageType == utils.ENUM.C2S.SUB) {
+                        const uuidHigh = buffer.getBigUint64(offset);
+                        offset += 8;
+                        const uuidLow = buffer.getBigUint64(offset);
+                        const hh = uuidHigh.toString(16).padStart(16, '0');
+                        const lh = uuidLow.toString(16).padStart(16, '0');
+                        const uuid_sub = utils.parseUUID(hh + lh)
 
-                            let bc = cache.localSessions.get(socket)
-                            if (bc) {
-                                bc.forEach(e => {
-                                    e.send(buf2)
-                                })
-                            }
-
-                            break;
-                        case utils.ENUM.C2S.SUB:
-                            var uuidHigh = buffer.getBigUint64(offset);
-                            offset += 8;
-                            var uuidLow = buffer.getBigUint64(offset);
-                            var hh = uuidHigh.toString(16).padStart(16, '0');
-                            var lh = uuidLow.toString(16).padStart(16, '0');
-                            let uuid_sub = utils.parseUUID(hh + lh)
-
+                        let self = cache.localSessions.get(socket)
+                        const target = (cache.sessions.find(e => (e.uuid == uuid_sub) && (e.ws != socket)))?.ws
+                        if (target) {
                             //self register
-                            let localSession = cache.localSessions.get(socket)
-                            if (!localSession) localSession = []
-                            let player2 = (cache.sessions.find(e => (e.uuid == uuid_sub) && (e.ws != socket)))?.ws
-                            if (player2) {
-                                localSession.push(player2)
-                                cache.localSessions.set(socket, localSession)
-                            }
+                            if (!self) self = []
+                            self.push(target)
+                            cache.localSessions.set(socket, self)
 
-                            //call everyplayer in world add self socket
-                            let otherWS = (cache.sessions.find(e => (e.uuid == uuid_sub) && (e.ws != socket)))?.ws
-                            if (otherWS) {
-                                let otherPlayer = cache.localSessions.get(otherWS)
-                                if (!otherPlayer) otherPlayer = []
-                                otherPlayer.push(socket)
-                                cache.localSessions.set(otherWS, otherPlayer)
-                            }
+                            //everyclient register
+                            let targetPlayer = cache.localSessions.get(target)
+                            if (!targetPlayer) targetPlayer = []
+                            targetPlayer.push(socket)
+                            cache.localSessions.set(target, targetPlayer)
+                        }
+                    } else if (messageType == utils.ENUM.C2S.UNSUB) {
+                        const uuidHigh = buffer.getBigUint64(offset);
+                        offset += 8;
+                        const uuidLow = buffer.getBigUint64(offset);
+                        const hh = uuidHigh.toString(16).padStart(16, '0');
+                        const lh = uuidLow.toString(16).padStart(16, '0');
+                        const uuid_unsub = utils.parseUUID(hh + lh)
 
-                            break;
-                        case utils.ENUM.C2S.UNSUB:
-                            var uuidHigh = buffer.getBigUint64(offset);
-                            offset += 8;
-                            var uuidLow = buffer.getBigUint64(offset);
-                            var hh = uuidHigh.toString(16).padStart(16, '0');
-                            var lh = uuidLow.toString(16).padStart(16, '0');
-                            let uuid_unsub = utils.parseUUID(hh + lh)
+                        // remove self
+                        cache.localSessions.delete(socket)
 
-                            // remove self
-                            cache.localSessions.delete(socket)
-
-                            //call everyplayer in world remove self socket
-                            let onlinePlayer = (cache.sessions.find(e => (e.uuid == uuid_unsub) && (e.ws != socket)))?.ws
-                            if (onlinePlayer) {
-                                let onlineSession = cache.localSessions.get(onlinePlayer)
-                                if (!onlineSession) onlineSession = []
-                                onlineSession = onlineSession.filter(e => e != socket)
-                                cache.localSessions.set(onlinePlayer, onlineSession)
-                            }
-
-                            break;
-                        default:
-                            console.log(messageType)
+                        //everyclient remove unsub from session
+                        const target = (cache.sessions.find(e => (e.uuid == uuid_unsub) && (e.ws != socket)))?.ws
+                        if (target) {
+                            let session = cache.localSessions.get(target)
+                            if (!session) session = []
+                            session = session.filter(e => e != socket)
+                            cache.localSessions.set(target, session)
+                        }
+                    }
+                    else {
+                        console.log(messageType)
                     }
                 }
             } catch (error) {
