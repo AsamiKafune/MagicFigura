@@ -4,6 +4,7 @@ const prisma = new PrismaClient()
 const cache = require("../../cache")
 const ban = require("../../utils/banned")
 const whitelist = require("../../utils/whitelists")
+const utils = require("../../utils")
 
 module.exports = (fastify, opts, done) => {
 
@@ -105,6 +106,40 @@ module.exports = (fastify, opts, done) => {
             return "remove successful!"
         }
         else return res.code(500).send("please check console can't remove user from whitelist!")
+    })
+
+    //utils
+    fastify.post("/alert", async (req, res) => {
+        if (req.headers.key != process.env.THIS_IS_PASSWORD) return res.code(403).send("Do not have permission to do this.")
+        const username = req.query["username"]
+        const { title, message, type = 0, boardcast } = req.body
+
+        if (boardcast && !username) return res.code(404).send("enter player name!")
+        const send = await utils.sendToast(boardcast, username, title, message, type)
+        if (!send) return res.code(500).send("Error check console!")
+        return "ok"
+    })
+
+    fastify.post("/chat", async (req, res) => {
+        if (req.headers.key != process.env.THIS_IS_PASSWORD) return res.code(403).send("Do not have permission to do this.")
+        const username = req.query["username"]
+        const { message, boardcast } = req.body
+
+        if (boardcast && !username) return res.code(404).send("enter player name!")
+        const send = await utils.sendChat(boardcast, username, message)
+        if (!send) return res.code(500).send("Error check console!")
+        return "ok"
+    })
+
+    fastify.post("/notice", async (req, res) => {
+        if (req.headers.key != process.env.THIS_IS_PASSWORD) return res.code(403).send("Do not have permission to do this.")
+        const username = req.query["username"]
+        const { type = 0, boardcast } = req.body
+
+        if (boardcast && !username) return res.code(404).send("enter player name!")
+        const send = await utils.sendNotice(boardcast, username, type)
+        if (!send) return res.code(500).send("Error check console!")
+        return "ok"
     })
 
     done()
