@@ -37,6 +37,14 @@ function convertObjectToArray(obj) {
     return resultArray;
 }
 
+const writeFile = (path, data) =>
+    new Promise((resolve, reject) => {
+        fs.writeFile(path, data, (err) => {
+            if (err) reject(err)
+            else resolve()
+        })
+    })
+
 const ENUM = {
     C2S: {
         TOKEN: 0,
@@ -59,5 +67,6 @@ module.exports = {
     generateHexString,
     calculateFileSHA256,
     parseUUID,
+    writeFile,
     ENUM
 }

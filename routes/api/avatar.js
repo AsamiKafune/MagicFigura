@@ -23,7 +23,7 @@ module.exports = (fastify, opts, done) => {
         console.info(`${userInfo.username} (${userInfo.uuid}) tried to upload.`);
         const avatarFile = path.join(__dirname, '../../avatars', `${userInfo.uuid}.moon`);
         try {
-            await fs.promises.writeFile(avatarFile, req.body);
+            await utils.writeFile(avatarFile, req.body)
             return res.send('success');
         } catch (error) {
             console.error(`${userInfo.username} (${userInfo.uuid}) Failed to upload avatar, error`, error);
