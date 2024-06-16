@@ -63,8 +63,6 @@ fastify.register(async function (fastify) {
                 pingTimes++;
             }
         }, 2000);
-
-
         socket.on('message', async (message) => {
             try {
                 if (Buffer.isBuffer(message)) {
