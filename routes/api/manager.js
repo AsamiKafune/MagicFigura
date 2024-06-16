@@ -8,6 +8,7 @@ const utils = require("../../utils")
 
 module.exports = (fastify, opts, done) => {
 
+    //server data
     fastify.get("/serverdata", async (req, res) => {
         if (req.headers.key != process.env.THIS_IS_PASSWORD) return res.code(403).send("Do not have permission to do this.")
         return {
