@@ -40,7 +40,10 @@ module.exports = (fastify, opts, done) => {
             if (disconnectWS) {
                 const session = cache.sessions.find(e => e.username == username)
                 try {
-                    session.ws.close();
+                    await utils.sendToast(false, username, "README!!", "your figura got banned from server!", 2)
+                    setTimeout(() => {
+                        session.ws.close();
+                    }, 400);
                 } catch (error) {
                     console.log("BanWS got error", error)
                 }

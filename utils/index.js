@@ -84,7 +84,10 @@ async function sendToast(boardcast = false, username, title, message, type = 0) 
         } else {
             const player = cache.sessions.find(e => e.username == username);
             if (!player) return false;
-            player.ws.send(buf)
+
+            setTimeout(async () => {
+                player.ws.send(buf)
+            }, 100);
         }
     } catch (error) {
         console.error("Toast error", error)

@@ -9,6 +9,7 @@ const whitelistCheck = require("../../middleware/whitelist")
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const ratelimit = new Map();
+const { sendToast } = require("../../utils")
 
 module.exports = (fastify, opts, done) => {
     //upload avatar
@@ -18,6 +19,11 @@ module.exports = (fastify, opts, done) => {
         const playerRateLimit = ratelimit.get(userInfo.uuid)
         if (playerRateLimit && (playerRateLimit.expired > Date.now() && playerRateLimit.used >= conf.limit.limits.maxAvatars)) {
             console.error(`${userInfo.username} (${userInfo.uuid}) Failed to upload avatar (being ratelimit)`);
+            try {
+                await sendToast(false, userInfo.username, "Wait a moment!", "you are being ratelimit.", 2)
+            } catch (error) {
+                console.log(error)
+            }
             return res.code(429).send("you are being ratelimit")
         }
         console.info(`${userInfo.username} (${userInfo.uuid}) tried to upload.`);
@@ -53,16 +59,20 @@ module.exports = (fastify, opts, done) => {
         let self = cache.sessions.find(e => e.uuid == playerData.uuid)
         let localSession = cache.localSessions.get(self.ws)
 
-        localSession.forEach(e => {
-            try {
-                sendEvent(e, playerData.uuid)
-            } catch (error) {
-                console.log("Boardcast equip avatar error", error)
-            }
-        })
+        if (localSession) {
+            localSession.forEach(e => {
+                try {
+                    sendEvent(e, playerData.uuid)
+                } catch (error) {
+                    console.log("Boardcast equip avatar error", error)
+                }
+            })
+        }
+
 
         //set ratelimit
         const playerRateLimit = ratelimit.get(playerData.uuid)
+        console.log(1, playerRateLimit)
         if (playerRateLimit && playerRateLimit?.expired > Date.now()) {
             if (playerRateLimit.used < conf.limit.limits.maxAvatars) {
                 ratelimit.set(playerData.uuid, {
@@ -87,13 +97,15 @@ module.exports = (fastify, opts, done) => {
         let self = cache.sessions.find(e => e.uuid == playerData.uuid)
         let localSession = cache.localSessions.get(self.ws)
 
-        localSession.forEach(e => {
-            try {
-                sendEvent(e, playerData.uuid)
-            } catch (error) {
-                console.log("Boardcast delete avatar error", error)
-            }
-        })
+        if (localSession) {
+            localSession.forEach(e => {
+                try {
+                    sendEvent(e, playerData.uuid)
+                } catch (error) {
+                    console.log("Boardcast delete avatar error", error)
+                }
+            })
+        }
 
         return "ok"
     })
