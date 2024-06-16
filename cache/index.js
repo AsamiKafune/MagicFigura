@@ -1,6 +1,6 @@
 module.exports = {
     serverIds: {},
-    players: new Map(),
+    players: {},
     sessions: [],
     localSessions: new Map(),
     wsData: new Map()
