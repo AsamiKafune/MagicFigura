@@ -6,11 +6,11 @@ module.exports = async (req, res) => {
     if (!validate) {
         console.error(req.user.data.username + " (" + req.user.data.uuid + ") tried to \"" + req.raw.url + "\" without whitelist.")
         try {
-            await sendToast(false, req.user.data.username, "No permission.", "whitelist is not allow.", 2)
+            await sendToast(false, req.user.data.username, "No permission.", "whitelist is not allowed.", 2)
         } catch (error) {
             // do nothing
         }
 
-        return res.code(403).send("whitelist is not allow.")
+        return res.code(403).send("whitelist is not allowed.")
     }
 }

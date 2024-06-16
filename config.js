@@ -29,7 +29,7 @@ module.exports = {
                 "action": "open_url",
                 "value": "https://kfn.moe"
             },
-            "text": "Visit "
+            "text": "MagicFigura by "
         },
         {
             "clickEvent": {
@@ -38,22 +38,52 @@ module.exports = {
             },
             "color": "gold",
             "underlined": true,
-            "text": "developer"
+            "text": "KafuneCH"
+        },
+        {
+            "color": "white",
+            "text": "\n\nสนับสนุนพวกเราด้วยการโดเนท\nเพื่อให้โปรเจ็คนี้อยู่ต่อไปนาน ๆ\n\n["
+        },
+        {
+            "clickEvent": {
+                "action": "open_url",
+                "value": "https://donate.kfn.moe/d/kafunech"
+            },
+            "color": "green",
+            "underlined": true,
+            "text": "คลิกที่นี่"
+        },
+        {
+            "color": "white",
+            "text": "] เพื่อโดเนท ขอบคุณครับ`(*>﹏<*)′"
+        },
+        {
+            "color": "white",
+            "text": "\n\n◆ Social Media ◆\n"
+        },
+        {
+            "clickEvent": {
+                "action": "open_url",
+                "value": "https://github.com/asamikafune"
+            },
+            "color": "blue",
+            "text": "Github: asamikafune\n"
+        },
+        {
+            "clickEvent": {
+                "action": "open_url",
+                "value": "https://www.youtube.com/@kafunech?sub_confirmation=1"
+            },
+            "color": "red",
+            "text": "Youtube: @kafunech\n"
         },
         {
             "clickEvent": {
                 "action": "open_url",
                 "value": "https://kfn.moe"
             },
-            "text": " website!\n\n"
-        },
-        {
-            "color": "red",
-            "text": "This is for roleplay server\n"
-        },
-        {
-            "color": "green",
-            "text": "if you want to selfhost figura backend\n contact me https://kfn.moe"
+            "color": "yellow",
+            "text": "Website: kfn.moe"
         }
     ]
 }
