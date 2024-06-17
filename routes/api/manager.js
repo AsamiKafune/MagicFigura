@@ -14,8 +14,8 @@ module.exports = (fastify, opts, done) => {
         return {
             info: {
                 databaseCount: await prisma.user.count(),
-                whitelists: 0,
-                banned: 0,
+                whitelists: whitelist.list.data.length,
+                banned: ban.list.data.length,
             },
             network: {
                 connected: cache.sessions.length,

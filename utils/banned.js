@@ -71,6 +71,7 @@ function updateList() {
 }
 
 module.exports = {
+    list: banList,
     banCheck,
     remove,
     add

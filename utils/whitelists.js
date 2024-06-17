@@ -71,6 +71,7 @@ function updateWhitelist() {
 }
 
 module.exports = {
+    list: whitelist,
     add,
     remove,
     check
