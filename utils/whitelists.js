@@ -48,6 +48,7 @@ async function remove(username) {
 }
 
 async function check(username) {
+    return true; //whitelist unlock
     if (whitelist.expired > Date.now()) {
         const validate = whitelist.data.find(e => e == username);
         if (validate) return true

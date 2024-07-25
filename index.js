@@ -81,11 +81,13 @@ fastify.register(async function (fastify) {
                             console.log(player.username, "-> connect to MagicFigura successful.")
 
                             cache.wsData.set(socket, player.uuid)
+                            cache.sessions = cache.sessions.filter(e => e.uuid != player.uuid)
                             cache.sessions.push({
                                 username: player.username,
                                 uuid: player.uuid,
                                 ws: socket
                             })
+
                             socket.send(Buffer.from([0]))
                         }
                     } else if (messageType == utils.ENUM.C2S.PING) {
@@ -105,12 +107,18 @@ fastify.register(async function (fastify) {
                         uuidb.copy(buf2, 1)
                         Buffer.from(new Uint8Array(bbfv.buffer)).copy(buf2, 17);
 
-                        const bc = cache.localSessions.get(socket)
-                        if (bc) {
-                            bc.forEach(e => {
-                                e.send(buf2)
-                            })
-                        }
+                        //boardcast
+                        cache.sessions.forEach(e => {
+                            if(e.ws != socket) {
+                                e.ws.send(buf2)
+                            }
+                        })
+                        // const bc = cache.localSessions.get(socket)
+                        // if (bc) {
+                        //     bc.forEach(e => {
+                        //         e.send(buf2)
+                        //     })
+                        // }
                     } else if (messageType == utils.ENUM.C2S.SUB) {
                         const uuidHigh = buffer.getBigUint64(offset);
                         offset += 8;
@@ -119,20 +127,20 @@ fastify.register(async function (fastify) {
                         const lh = uuidLow.toString(16).padStart(16, '0');
                         const uuid_sub = utils.parseUUID(hh + lh)
 
-                        let self = cache.localSessions.get(socket)
-                        const target = (cache.sessions.find(e => (e.uuid == uuid_sub) && (e.ws != socket)))?.ws
-                        if (target) {
-                            //self register
-                            if (!self) self = []
-                            self.push(target)
-                            cache.localSessions.set(socket, self)
+                        // let self = cache.localSessions.get(socket)
+                        // const target = (cache.sessions.find(e => (e.uuid == uuid_sub) && (e.ws != socket)))?.ws
+                        // if (target) {
+                        //     //self register
+                        //     if (!self) self = []
+                        //     self.push(target)
+                        //     cache.localSessions.set(socket, self)
 
-                            //everyclient register
-                            let targetPlayer = cache.localSessions.get(target)
-                            if (!targetPlayer) targetPlayer = []
-                            targetPlayer.push(socket)
-                            cache.localSessions.set(target, targetPlayer)
-                        }
+                        //     //everyclient register
+                        //     let targetPlayer = cache.localSessions.get(target)
+                        //     if (!targetPlayer) targetPlayer = []
+                        //     targetPlayer.push(socket)
+                        //     cache.localSessions.set(target, targetPlayer)
+                        // }
                     } else if (messageType == utils.ENUM.C2S.UNSUB) {
                         const uuidHigh = buffer.getBigUint64(offset);
                         offset += 8;
@@ -141,17 +149,17 @@ fastify.register(async function (fastify) {
                         const lh = uuidLow.toString(16).padStart(16, '0');
                         const uuid_unsub = utils.parseUUID(hh + lh)
 
-                        // remove self
-                        cache.localSessions.delete(socket)
+                        // // remove self
+                        // cache.localSessions.delete(socket)
 
-                        //everyclient remove unsub from session
-                        const target = (cache.sessions.find(e => (e.uuid == uuid_unsub) && (e.ws != socket)))?.ws
-                        if (target) {
-                            let session = cache.localSessions.get(target)
-                            if (!session) session = []
-                            session = session.filter(e => e != socket)
-                            cache.localSessions.set(target, session)
-                        }
+                        // //everyclient remove unsub from session
+                        // const target = (cache.sessions.find(e => (e.uuid == uuid_unsub) && (e.ws != socket)))?.ws
+                        // if (target) {
+                        //     let session = cache.localSessions.get(target)
+                        //     if (!session) session = []
+                        //     session = session.filter(e => e != socket)
+                        //     cache.localSessions.set(target, session)
+                        // }
                     }
                     else {
                         console.log(messageType)
