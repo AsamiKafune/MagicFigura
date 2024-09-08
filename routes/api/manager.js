@@ -10,10 +10,13 @@ module.exports = (fastify, opts, done) => {
 
     //server data
     fastify.get("/serverdata", async (req, res) => {
-        if (req.headers.key != process.env.THIS_IS_PASSWORD) return res.code(403).send("Do not have permission to do this.")
+        
+        whitelist.list = whitelist.updateWhitelist()
+        ban.list = ban.updateList()
+
         return {
             info: {
-                databaseCount: await prisma.user.count(),
+                userCount: await prisma.user.count(),
                 whitelists: whitelist.list.data.length,
                 banned: ban.list.data.length,
             },

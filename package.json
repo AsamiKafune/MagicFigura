@@ -1,11 +1,12 @@
 {
   "name": "magicfigura",
-  "version": "1.0.0",
+  "version": "0.1.4",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "@fastify/multipart": "^8.3.0",
     "@fastify/websocket": "^10.0.1",
+    "@prisma/client": "^5.19.1",
     "axios": "^1.7.2",
     "crypto": "^1.0.1",
     "fastify": "^4.27.0",

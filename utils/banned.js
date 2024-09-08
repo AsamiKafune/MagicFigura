@@ -62,6 +62,7 @@ async function banCheck(username) {
 function updateList() {
     let raw = fs.readFileSync(path.join(__dirname, "../banned.txt"))
     raw = raw.toString().split("\r\n");
+    if(raw[0]=="") raw = []
     raw = {
         expired: Date.now() + (1000 * 30),
         data: raw
@@ -71,6 +72,7 @@ function updateList() {
 }
 
 module.exports = {
+    updateList,
     list: banList,
     banCheck,
     remove,
