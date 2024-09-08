@@ -1,11 +1,13 @@
 module.exports = {
+    whitelist: false,
     port: 3000,
     host: "0.0.0.0",
     version: {
-        "release": "0.1.4",
-        "prerelease": "0.1.4"
+        "release": require("./package.json").version,
+        "prerelease": require("./package.json").version
     },
-    welcomeMessage: "Hello from MagicFigura",
+    multiInstant: true,
+    welcomeMessage: "Hello from MagicFigura Emulator V2",
     limit: {
         "rate": {
             "pingSize": 1024,
