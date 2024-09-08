@@ -68,7 +68,7 @@ module.exports = (fastify, opts, done) => {
                         console.log("UpdateData Error: ",error);
                     }
                 }
-
+                
                 cache.players[token] = {
                     uuid: utils.parseUUID(r.id),
                     username: r.name,
