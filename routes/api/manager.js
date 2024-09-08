@@ -25,8 +25,7 @@ module.exports = (fastify, opts, done) => {
                 upTime: ((((Date.now() - st) / 1000) / 60) / 60).toFixed(2) + " Hr.",
                 network: {
                     Connected: cache.sessions.length,
-                    Sessions: cache.localSessions.size,
-                    PlayerList: cache.sessions.map(e => e.username)
+                    Sessions: cache.localSessions.size
                 }
             },
             database: {
