@@ -71,6 +71,12 @@ module.exports = (fastify, opts, done) => {
                 }).catch(() => { })
             }
 
+            await prisma.user.delete({
+                where: {
+                    username: username
+                }
+            }).catch(e => { })
+
             return "user has been banned from system"
         }
         else return res.code(500).send("please check console can't add user to ban list!")
@@ -120,6 +126,11 @@ module.exports = (fastify, opts, done) => {
 
         const userremove = await whitelist.remove(username)
         if (userremove) {
+            await prisma.user.delete({
+                where: {
+                    username: username
+                }
+            }).catch(e => { })
             return "remove successful!"
         }
         else return res.code(500).send("please check console can't remove user from whitelist!")
