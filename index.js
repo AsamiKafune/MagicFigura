@@ -198,7 +198,6 @@ function removeSession(socket) {
     cache.sessions = cache.sessions.filter(e => e.ws != socket) // remove session when close game
     cache.localSessions.delete(socket) // remove localSessions when close game
 }
-
 fastify.listen({
     port: conf.port,
     host: conf.host

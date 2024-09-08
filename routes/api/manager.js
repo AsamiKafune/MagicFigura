@@ -5,24 +5,34 @@ const cache = require("../../cache")
 const ban = require("../../utils/banned")
 const whitelist = require("../../utils/whitelists")
 const utils = require("../../utils")
+const config = require('../../config')
+let st = 0
 
 module.exports = (fastify, opts, done) => {
+    //startup
+    st = Date.now()
 
     //server data
-    fastify.get("/serverdata", async (req, res) => {
-        
+    fastify.get("/serverinfo", async (req, res) => {
+
         whitelist.list = whitelist.updateWhitelist()
         ban.list = ban.updateList()
 
         return {
             info: {
+                nodeName: config.nodeName,
+                modVersion: config.version.release,
+                upTime: ((((Date.now() - st) / 1000) / 60) / 60).toFixed(2) + " Hr.",
+                network: {
+                    Connected: cache.sessions.length,
+                    Sessions: cache.localSessions.size,
+                    PlayerList: cache.sessions.map(e => e.username)
+                }
+            },
+            database: {
                 userCount: await prisma.user.count(),
                 whitelists: whitelist.list.data.length,
                 banned: ban.list.data.length,
-            },
-            network: {
-                connected: cache.sessions.length,
-                sessions: cache.localSessions.size
             }
         }
     })

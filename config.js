@@ -1,12 +1,13 @@
 module.exports = {
-    whitelist: false,
-    port: 3000,
-    host: "0.0.0.0",
+    nodeName: "asia, Thailand bangkok",
     version: {
         "release": require("./package.json").version,
         "prerelease": require("./package.json").version
     },
     multiInstant: true,
+    whitelist: false,
+    port: 3000,
+    host: "0.0.0.0",
     welcomeMessage: "Hello from MagicFigura Emulator V2",
     limit: {
         "rate": {
