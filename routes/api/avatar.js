@@ -15,7 +15,6 @@ module.exports = (fastify, opts, done) => {
     //upload avatar
     fastify.put("/avatar", { preHandler: [playerCache, whitelistCheck] }, async (req, res) => {
         const userInfo = req.user["data"];
-
         const playerRateLimit = ratelimit.get(userInfo.uuid)
         if (playerRateLimit && (playerRateLimit.expired > Date.now() && playerRateLimit.used >= conf.limit.limits.maxAvatars)) {
             console.error(`${userInfo.username} (${userInfo.uuid}) Failed to upload avatar (being ratelimit)`);
@@ -40,7 +39,6 @@ module.exports = (fastify, opts, done) => {
     //verify equip
     fastify.post("/equip", { preHandler: [playerCache, whitelistCheck] }, async (req, res) => {
         const playerData = req.user["data"];
-
         try {
             await prisma.user.update({
                 where: {
@@ -57,29 +55,31 @@ module.exports = (fastify, opts, done) => {
         console.info(`${playerData.username} (${playerData.uuid}) upload successful.`);
 
         //boardcast all
-        cache.sessions.forEach(e => {
-            if (e.uuid != playerData.uuid) {
-                try {
-                    sendEvent(e.ws, playerData.uuid)
-                } catch (error) {
-                    console.log("Boardcast equip avatar error", error)
-                }
+
+        if (conf.multiInstant) {
+            let self = cache.sessions.find(e => e.uuid == playerData.uuid)
+            let localSession = cache.localSessions.get(self.ws)
+
+            if (localSession) {
+                localSession.forEach(e => {
+                    try {
+                        sendEvent(e, playerData.uuid)
+                    } catch (error) {
+                        console.log("Boardcast equip avatar error", error)
+                    }
+                })
             }
-        })
-
-        // let self = cache.sessions.find(e => e.uuid == playerData.uuid)
-        // let localSession = cache.localSessions.get(self.ws)
-
-        // if (localSession) {
-        //     localSession.forEach(e => {
-        //         try {
-        //             sendEvent(e, playerData.uuid)
-        //         } catch (error) {
-        //             console.log("Boardcast equip avatar error", error)
-        //         }
-        //     })
-        // }
-
+        } else {
+            cache.sessions.forEach(e => {
+                if (e.uuid != playerData.uuid) {
+                    try {
+                        sendEvent(e.ws, playerData.uuid)
+                    } catch (error) {
+                        console.log("Boardcast equip avatar error", error)
+                    }
+                }
+            })
+        }
 
         //set ratelimit
         const playerRateLimit = ratelimit.get(playerData.uuid)
@@ -105,32 +105,31 @@ module.exports = (fastify, opts, done) => {
         const playerData = req.user["data"];
         fs.unlinkSync(path.join(__dirname, "../../avatars", playerData.uuid + ".moon"))
 
-
-
         //boardcast all
-        cache.sessions.forEach(e => {
-            if (e.uuid != playerData.uuid) {
-                try {
-                    sendEvent(e.ws, playerData.uuid)
-                } catch (error) {
-                    console.log("Boardcast delete avatar error", error)
-                }
+        if (conf.multiInstant) {
+            let self = cache.sessions.find(e => e.uuid == playerData.uuid)
+            let localSession = cache.localSessions.get(self.ws)
+
+            if (localSession) {
+                localSession.forEach(e => {
+                    try {
+                        sendEvent(e, playerData.uuid)
+                    } catch (error) {
+                        console.log("Boardcast delete avatar error", error)
+                    }
+                })
             }
-        })
-
-        // let self = cache.sessions.find(e => e.uuid == playerData.uuid)
-        // let localSession = cache.localSessions.get(self.ws)
-
-        // if (localSession) {
-        //     localSession.forEach(e => {
-        //         try {
-        //             sendEvent(e, playerData.uuid)
-        //         } catch (error) {
-        //             console.log("Boardcast delete avatar error", error)
-        //         }
-        //     })
-        // }
-
+        } else {
+            cache.sessions.forEach(e => {
+                if (e.uuid != playerData.uuid) {
+                    try {
+                        sendEvent(e.ws, playerData.uuid)
+                    } catch (error) {
+                        console.log("Boardcast delete avatar error", error)
+                    }
+                }
+            })
+        }
         return "ok"
     })
 
@@ -150,8 +149,6 @@ module.exports = (fastify, opts, done) => {
                 res.code(500).send('Internal Server Error');
             }
         }
-
-
     })
 
     //getuser // check auth
