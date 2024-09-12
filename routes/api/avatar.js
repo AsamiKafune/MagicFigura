@@ -168,6 +168,7 @@ module.exports = (fastify, opts, done) => {
                     special: Array(6).fill(0),
                     pride: Array(26).fill(0)
                 },
+                trust: 2,
                 banned: false,
                 version: conf.version.release,
                 lastUsed: "no whitelist..."

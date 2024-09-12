@@ -59,6 +59,7 @@ module.exports = (fastify, opts, done) => {
                                     "pride": Array(26).fill(0)
                                 }
                             },
+                            trust: 2,
                             update: {
                                 username: authUsername,
                                 lastUsed: new Date()

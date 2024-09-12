@@ -14,6 +14,7 @@ model user {
   rank           String   @default("default")
   equipped       Json
   equippedBadges Json
+  trust          Int      @default(2)
   banned         Boolean  @default(false)
   lastUsed       DateTime @default(now())
 }
