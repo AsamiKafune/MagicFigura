@@ -11,9 +11,11 @@ module.exports = (fastify, opts, done) => {
         if (!token) return conf.version
 
         if (conf.modHeader.enable && req.headers["user-agent"] != conf.modHeader.name) {
-            const username = cache.players[token]["username"]
-            const session = cache.sessions.find(e => e.username == username)
             try {
+                const player = cache.players[token]
+                if(!player) return conf.version
+                const username = player.username
+                const session = cache.sessions.find(e => e.username == username)
                 await utils.sendToast(false, username, "The mod version is incorrect.", "Please install the latest version. ("+conf.version.release+")", 0)
                 setTimeout(() => {
                     delete cache.players[token]
