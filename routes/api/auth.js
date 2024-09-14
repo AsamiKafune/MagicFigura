@@ -19,11 +19,6 @@ module.exports = (fastify, opts, done) => {
             return res.code(400).send("Username is required")
         }
 
-        if (conf.modHeader.enable && req.headers["user-agent"] != conf.modHeader.name) {
-            console.log(username + " -> failed to connect (Header Not Match)")
-            return res.code(403).send("The mod version is incorrect. Please install the latest version from the administrator (not official).")
-        }
-
         const isBan = await ban.banCheck(username);
         if (isBan) {
             console.log(username + " -> failed to connect (banned)")
@@ -88,7 +83,7 @@ module.exports = (fastify, opts, done) => {
                 setTimeout(() => {
                     delete cache.serverIds[serverId] // clear cache serverId
                 }, 20000);
-
+                
                 return res.send(token);
             } catch (error) {
                 console.error(error);
