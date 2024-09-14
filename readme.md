@@ -10,6 +10,7 @@ Alt Emulator FiguraBackend V2 for selfhost
 - Whitelist
 - fully config
 - Noti (alert toast, chat)
+- modHeader Lock (just added for fun)
 - Support Figura version 1.1+
 
 ## KnowBug
