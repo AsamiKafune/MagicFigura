@@ -4,6 +4,10 @@ module.exports = {
         "release": require("./package.json").version,
         "prerelease": require("./package.json").version
     },
+    modHeader: {
+        name: "Figura/"+require("./package.json").version+"+1.20.1",
+        enable: false
+    },
     multiInstant: true,
     whitelist: false,
     port: 3000,
