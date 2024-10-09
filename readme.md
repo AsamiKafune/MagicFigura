@@ -33,7 +33,17 @@ To deploy backend (please use cloudflare tunnel or something for make Verify SSL
 
 ## ✨Please
 
+```
+(en)
 If you use it on your server please credit me KafuneCH.
+Please don't claim it as your own work.
+If you want to continue development, please choose Fork this project instead of Download.
+
+(th)
+หากนำไปใช้รบกวนไม่ลบ Credit ใน Motd และที่อื่นๆเว้นแต่คุณจะได้รับอนุญาต
+กรุณาไม่เคลมผลงานหรือแอบอ้างว่าคุณจัดทำขึ้นเองทั้งหมด
+หากต้องการนำไปพัฒนาต่อรบกวนกด Fork project แทนการกด Download เพื่อที่เราจะสามารถช่วยเหลือคุณได้ในอนาคตและเป็นการให้เกรียติ์โปรเจ็คต้นฉบับ
+```
 
 ## Tech Stack
 **Server:** Node, websocket, fastify
