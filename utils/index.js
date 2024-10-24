@@ -3,6 +3,14 @@ const fs = require("fs")
 const { stringify: uuidStringify } = require('uuid');
 const cache = require("../cache")
 
+const wl = require("./whitelists")
+const bn = require("./banned")
+
+function triggerUpdate() {
+    wl.updateWhitelist()
+    bn.updateList()
+}
+
 async function generateHexString(length) {
     return crypto.randomBytes(length).toString('hex');
 }
@@ -156,5 +164,6 @@ module.exports = {
     sendToast,
     sendNotice,
     sendChat,
-    ENUM
+    ENUM,
+    triggerUpdate
 }

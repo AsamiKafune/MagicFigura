@@ -5,6 +5,8 @@ const conf = require("./config");
 const utils = require("./utils");
 const cache = require("./cache");
 
+utils.triggerUpdate()
+
 //cors origin bypass
 fastify.options('*', function (request, reply) {
     reply.send()
