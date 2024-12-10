@@ -96,10 +96,10 @@ fastify.register(async function (fastify) {
                         const uuid = cache.wsData.get(socket);
                         const bytesToReplace = Buffer.from(buffer.buffer.slice(1));
 
-                        let bbf = new ArrayBuffer(6);
+                        let bbf = new ArrayBuffer(buffer.buffer.byteLength-1);
                         let bbfv = new DataView(bbf);
 
-                        for (var i = 0; i < 6; i++) {
+                        for (var i = 0; i < buffer.buffer.byteLength-1; i++) {
                             bbfv.setInt8(i, bytesToReplace[i]);
                         }
 
